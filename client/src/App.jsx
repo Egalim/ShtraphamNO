@@ -1,4 +1,4 @@
-import { RouterProvider, createBrowserRouter, Navigate } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { useSelector } from "react-redux"
 import "./index.css";
 import Auth from "./entry/Auth";
@@ -13,15 +13,16 @@ import Reg from "./entry/Reg";
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <Navigate to="/auth" />
-      },
-      {
-        path: "/auth",
-        element: <Auth />
-    },
-    {
-        path: "/reg",
-        element: <Reg />,
+        element: <Outlet />,
+        children: [
+            {
+                path: "/auth",
+                element: <Auth />
+            },
+            {
+                path: "/reg",
+                element: <Reg />,
+            }]
     },
     {
         path: '*',
@@ -32,34 +33,48 @@ const router = createBrowserRouter([
 const authRouter = createBrowserRouter([
     {
         path: "/",
-        element: <Main />
-    },
-    {
-        path: "/account",
-        element: <Account />
-    },
-    {
-        path: "/changeAccount",
-        element: <ChangeAccount />
-    },
-    {
-        path: '*',
-        element: <Navigate to="/" />
+        element: <Outlet />,
+        children: [
+            {
+                path: '/',
+                element: <Main />
+            },
+            {
+                path: "/account",
+                element: <Account />
+            },
+            {
+                path: "/changeAccount",
+                element: <ChangeAccount />
+            },
+            {
+                path: '*',
+                element: <Navigate to="/" />
+            }]
     }
 ])
 
 const authRouterAdmin = createBrowserRouter([
     {
-        path: "/admin",
-        element: <Admin />
-    },
-    {
-        path: "/account",
-        element: <AccountAdmin />
-    },
-    {
-        path: '*',
-        element: <Navigate to="/admin" />
+        path: '/',
+        element: <Outlet />,
+        children: [
+            {
+                path: "/admin",
+                element: <Admin />
+            },
+            {
+                path: "/account",
+                element: <AccountAdmin />
+            },
+            {
+                path: "/changeAccount",
+                element: <ChangeAccount />
+            },
+            {
+                path: '*',
+                element: <Navigate to="/admin" />
+            }]
     }
 ])
 
@@ -73,7 +88,7 @@ function App() {
 
     return (
         token ?
-            role === 'ADMIN' ?
+            role == 2 ?
                 <RouterProvider router={authRouterAdmin} /> :
                 <RouterProvider router={authRouter} /> :
             <RouterProvider router={router} />

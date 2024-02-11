@@ -1,65 +1,70 @@
 import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
+import { authThunk } from '../redux/authSlice.js'
 import '../components/Form.css'
 import logo from '../assets/logo.svg'
 import { Link } from 'react-router-dom';
 
 export default function Auth() {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const [password, setPassword] = useState('')
+    const [email, setEmail] = useState('')
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+    const authState = useSelector((state) => state.auth)
+    const dispatch = useDispatch()
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Добавьте здесь логику обработки отправки формы
-        console.log(formData);
-    };
+    const path = useLocation()
+
     return (
-        <div className='container'>
-            <div className="logo">
-                <img src={logo} alt="logo" />
-            </div>
-            <div className="content">
+        authState.loading ? <p>Loading...</p> :
+            <div className='container'>
+                <div className="logo">
+                    <img src={logo} alt="logo" />
+                </div>
+                <div className="content">
 
-                <form onSubmit={handleSubmit} className='form'>
-                    <h1 className='txt_semi_bold'>Авторизация</h1>
-                    <div className="form-content">
-                        <div>
-                            <input
-                                placeholder="Введите почту:"
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
+                    <form className='form'>
+                        <h1 className='txt_semi_bold'>Авторизация</h1>
+                        <div className="form-content">
+                            <div>
+                                <input
+                                    placeholder="Введите почту:"
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    placeholder="Введите пароль:"
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <input
-                                placeholder="Введите пароль:"
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                    </div>
-                    
-                        <button className='btn_form' type="submit">Войти</button><br></br>
+
+                        <button className='btn_form' type="submit" onClick={() => {
+                            dispatch(authThunk({
+                                email: email,
+                                password: password
+                            }))
+                        }}>Войти</button><br></br>
                         <Link to={'/reg'}
-                        className={path == "/reg" ? "location" : ''}>Регистрация</Link>
-                   
-                </form>
+                            className={path == "/reg" ? "location" : ''}><p style={{ marginTop: "1vh" }}>Регистрация</p></Link>
+
+                    </form>
+                    {
+                        authState.error ? <p>{authState.error}</p> : <></>
+                    }
+                </div>
             </div>
-        </div>
     )
 }
 

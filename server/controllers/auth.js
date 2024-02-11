@@ -5,8 +5,8 @@ import { generateAccessToken } from "../utils/generateToken.js";
 export const auth = async (req, res) => {
     const { email, password } = req.body
     const user = await sql`select * from Users where email = ${email}`
-    if (!user) {
-        return res.status(400).json({ message: `Пользователь не найден` })
+    if (!user || user.length === 0) {
+        return res.status(400).json({ message: `Пользователь не найден` });
     }
     const validPassword = bcrypt.compareSync(password, user[0].password)
     if (!validPassword) {

@@ -7,19 +7,30 @@ import { reg } from "./controllers/reg.js";
 import { auth } from "./controllers/auth.js";
 import { uploadFiles } from "./controllers/uploadFiles.js";
 
-const upload = multer({ dest: "uploads/" });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + '.' + file.mimetype.split('/')[1])
+    }
+})
+
+
+const upload = multer({ storage });
 const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static('public'))
 
-app.get('/admin', roleMiddleware(["ADMIN"]), async (req, res) => {
-    const data = await sql`select * from Requests where statusId = 1 limit 1`
+app.get('/admin',  async (req, res) => {
+    const data = await sql`select * from Requests where statusId = 1`
     res.send(data)
 })
-app.get('/requests', roleMiddleware(["USER"]), async (req, res) => {
-    const { userId } = req.body
-    const data = await sql`select * from Requests where userId = ${userId} limit 10`
+app.get('/requests/:id', async (req, res) => {
+    const id = req.params.id
+    const data = await sql`select * from Requests where userId = ${id}`
     res.send(data)
 })
 app.get('/nextrequests', async (req, res) => {
@@ -27,24 +38,25 @@ app.get('/nextrequests', async (req, res) => {
     const data = await sql`select * from Requests where userId = ${userId} limit 10 offset ${count}`
     res.send(data)
 })
-app.get('/profile', async (req, res) => {
-    const { id } = req.body
+app.get('/profile/:id', async (req, res) => {
+    const id = req.params.id
     const data = await sql`select * from Users where id = ${id}`
     res.send(data)
 })
 
 app.post('/reg', reg)
 app.post('/auth', auth)
-app.post("/newrequest", upload.single("files"), uploadFiles);
+app.post("/newrequest", upload.single("image"), uploadFiles);
 
-app.put('/updateprofile', async (req, res) => {
-    const { id, name, email } = req.body
-    const update = await sql`update Users set nick = ${name}, phone = ${email} where id = ${id}`
+app.put('/updateprofile/:id', async (req, res) => {
+    const id = req.params.id
+    const { name, email } = req.body
+    const update = await sql`update Users set name = ${name}, email = ${email} where id = ${id} RETURNING *`
     res.send(update)
 })
-app.patch('/adminrequests', roleMiddleware(["ADMIN"]), async (req, res) => {
+app.patch('/adminrequests', async (req, res) => {
     const { id, status } = req.body
-    const update = await sql`update Requests set statusId = ${status} where id = ${id}`
+    const update = await sql`update Requests set statusId = ${status} where id = ${id} RETURNING *`
     res.send(update)
 })
 

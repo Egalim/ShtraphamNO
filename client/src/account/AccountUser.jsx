@@ -1,54 +1,35 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/header/Header'
 import './Account.css'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import img from '../assets/1.jpg'
 import CardUser from '../components/card_user/CardUser'
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function Account() {
-    const infoUser = {
-        name: "Петров Петр Петрович",
-        email: "petrov@gmail.com"
-    }
+    const role = useSelector((state) => state.auth.roleid)
+    const id = useSelector((state) => state.auth.id)
+    const path = useLocation()
 
-    const application = [
-        {
-            id: "8798",
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        }
-    ]
+    const [info, setInfo] = useState([])
+    const [requests, setRequests] = useState([])
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        fetch(`http://localhost:5000/profile/${id}`)
+            .then(res => res.json())
+            .then(json => setInfo(json))
+    }, [id])
+
+    useEffect(() => {
+        fetch(`http://localhost:5000/requests/${id}`)
+            .then(res => res.json())
+            .then(json => setRequests(json))
+    }, [id])
+
+    console.log(id);
+   
     return (
         <div className='container'>
             <Header visible={1}/>
@@ -57,8 +38,8 @@ export default function Account() {
                 <div className="info_user">
                     <h1 className='txt_semi_bold'>Личный кабинет</h1>
                     <div className="userTXT">
-                        <h2 className='txt_semi_bold'>{infoUser.name}</h2>
-                        <p className='txt_semi_bold'>{infoUser.email}</p>
+                        <h2 className='txt_semi_bold'>{info[0]?.name}</h2>
+                        <p className='txt_semi_bold'>{info[0]?.email}</p>
                         <Link to={"/changeAccount"}><h4 className='txt_grey'>Изменить данные профиля</h4></Link>
                     </div>
                 </div>
@@ -66,9 +47,9 @@ export default function Account() {
                 <h2>Ваши заявки:</h2>
                 <div className="main_account">
                     {
-                        application.map((e) => {
+                        requests.map((e) => {
                             return (
-                                <CardUser id={e.id} image={e.image} date={e.date} number={e.number} addres={e.addres} comment={e.comment} status={e.status} />
+                                <CardUser id={e.id} image={e.image} date={e.date} numberCar={e.numbercar} addres={e.addres} comment={e.comment} status={e.statusid} />
                             )
                         })
                     }

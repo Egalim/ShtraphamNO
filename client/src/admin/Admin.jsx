@@ -1,52 +1,93 @@
-import React from 'react'
-import img from '../assets/1.jpg'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/header/Header'
 import './Admin.css'
 import CardAdmin from '../components/card_admin/CardAdmin'
+import { useSelector } from 'react-redux'
+import { useLocation } from 'react-router-dom'
 
-export default function Admin() {
-    const application = [
-        {
-            id: "8798",
-            author: 'Петров Петр Петрович',
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            author: 'Петров Петр Петрович',
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            author: 'Петров Петр Петрович',
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
-        },
-        {
-            id: "8798",
-            author: 'Петров Петр Петрович',
-            image: img,
-            date: "01.02.2024",
-            number: "x000xx 00",
-            addres: " г.Оренбург, Чкалова 11",
-            comment: "Автомобиль был припаркован на тротуаре, блокируя доступ для пешеходов, особенно для мам с детьми в колясках и людей с ограниченными возможностями. Это создает опасность и неудобства для всех, кто пользуется этим тротуаром. Нарушения правил стоянки не только мешают нормальному движению, но и создают реальные проблемы для окружающих. Пожалуйста, будьте внимательны к правилам стоянки, оставляйте проходимость и безопасность для всех.",
-            status: "в ожидании"
+function Admin() {
+    const [requests, setRequests] = useState([])
+
+    const token = useSelector((state) => state.auth.token)
+    const role = useSelector((state) => state.auth.roleid)
+    const id = useSelector((state) => state.auth.id)
+
+    const path = useLocation()
+
+    const True = async (id) => {
+        try {
+            const data = {
+                id: id,
+                status: 2
+            }
+            const response = await fetch(`http://localhost:5000/adminrequests`, {
+                method: 'PATCH',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": 'application/json'
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                console.log("Данные успешно изменены");
+            } else {
+                console.log("Ошибка при отправке данных на сервер");
+            }
+        } catch (error) {
+            console.log("Ошибка при отправке данных ", error);
         }
-    ]
+    }
+
+    const False = async (id) => {
+        try {
+            const data = {
+                id: id,
+                status: 3
+            }
+            const response = await fetch(`http://localhost:5000/adminrequests`, {
+                method: 'PATCH',
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": 'application/json'
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                console.log("Данные успешно изменены");
+                
+            } else {
+                console.log("Ошибка при отправке данных на сервер");
+            }
+        } catch (error) {
+            console.log("Ошибка при отправке данных ", error);
+        }
+    }
+
+    const getInfo = () => {
+        fetch(`http://localhost:5000/admin`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res => res.json())
+            .then(json => setRequests(json))
+    }
+
+    useEffect(() => {
+        fetch(`http://localhost:5000/admin`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        })
+            .then(res => res.json())
+            .then(json => setRequests(json))
+    }, [token])
     return (
         <div className='container'>
             <Header />
@@ -54,15 +95,39 @@ export default function Admin() {
                 <h1 className='txt_semi_bold head'>Заявки на нарушения ПДД</h1>
                 <div className="main_admin">
                     {
-                        application.map((e) => {
-                            return (
-                                <CardAdmin id={e.id} author={e.author} image={e.image} date={e.date} number={e.number} addres={e.addres} comment={e.comment} status={e.status} />
-                            )
-                        })
+                        requests.map(e => (
+                            <div className='container_card' key={e.id}>
+                                <h4>Заявка: {e.id}</h4>
+
+                                <div className="info_card">
+                                    <img className="img_card" src={`http://localhost:5000/${e.image}`} alt="" />
+                                    <div className="txt_card">
+                                        {/* <div className="row"><p className='txt_bold'>Автор:</p>{author}</div> */}
+                                        <div className="row"><p className='txt_bold'>Дата:</p>{e.date}</div>
+                                        <div className="row"><p className='txt_bold'>Адрес:</p>{e.addres}</div>
+                                        <div className="row"><p className='txt_bold'>Номер автомобиля:</p>{e.numbercar}</div>
+                                        {/* <div ><span className='txt_bold'>Комментарий: </span>{comment}</div> */}
+
+                                        <div className="btn_admin txt_white">
+                                            <button className='btn_admin_no txt_semi_bold' onClick={() => {
+                                                False(e.id);
+                                                getInfo()
+                                            }}>Отклонить</button>
+                                            <button className='btn_admin_yes txt_semi_bold' onClick={() => {
+                                                True(e.id);
+                                                getInfo()
+                                            }}>Принять</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        ))
                     }
                 </div>
             </div>
         </div>
     )
 }
+export default Admin
 
